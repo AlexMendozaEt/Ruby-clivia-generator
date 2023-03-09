@@ -1,6 +1,6 @@
 require "colorize"
 
-module TextClivia
+module HelpersMethods
   def welcome
     puts ["###################################",
           "#    Welcome to Clivia Generator  #",
@@ -27,7 +27,7 @@ module TextClivia
     gets.chomp.strip.downcase
   end
 
-  def safe?(score)
+  def score_points(score)
     puts "Well done! Your score is #{score}".colorize(:blue)
     puts "--------------------------------------------------"
   end
@@ -38,12 +38,8 @@ module TextClivia
     rows = []
     table_sort_by = table_scores.sort { |first, second| second[:score] <=> first[:score] }
     table_sort_by.map do |hash|
-      score = if hash[:score] >= 50
-                hash[:score].to_s.colorize(:green)
-              else
-                hash[:score].to_s.colorize(:red)
-              end
-
+      data = hash[:score].to_s
+      score = hash[:score] >= 50 ? data.colorize(:green) : data.to_s.colorize(:red)
       rows << [hash[:name].capitalize, score]
     end
     show_table_scores(rows)
