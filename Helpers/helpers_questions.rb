@@ -9,15 +9,25 @@ module QuestionsMethods
     @number_questions
   end
 
+  # The name of the parameter is confusing, 
+  # what is coming here is the number of questions, not "questions" 👇
   def ask_questions(questions)
     random_trivia(questions)
+
     @questions.map do |question|
-      make_question(question[:category], question[:question], question[:difficulty], question[:incorrect_answers],
-                    question[:correct_answer])
+      make_question(
+        question[:category], 
+        question[:question], 
+        question[:difficulty], 
+        question[:incorrect_answers],
+        question[:correct_answer]
+      )
+      
       @count = 1
     end
+
     score_points(@score, questions)
-    
+
     loop do
       action = text_coment("Do you want to save your score? (y/n)")
       case action
@@ -32,6 +42,8 @@ module QuestionsMethods
     end
   end
 
+  # The name of the parameter is confusing, 
+  # what is coming here is the number of questions, not "questions" 👇
   def random_trivia(questions)
     @questions = CliviaApi.questions(questions)[:results]
   end
