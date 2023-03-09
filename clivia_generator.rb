@@ -1,25 +1,60 @@
-# do not forget to require your gem dependencies
-# do not forget to require_relative your local dependencies
+require "htmlentities"
+require_relative "text_input"
+require_relative "clivia_api"
 
 class CliviaGenerator
-  # maybe we need to include a couple of modules?
+  include TextClivia
 
-  def initialize
-    # we need to initialize a couple of properties here
+  def initialize(filename)
+    @decoder = HTMLEntities.new
+    @filename = filename
+    @questions = []
+    @score = 0
+    @count = 1
   end
 
   def start
-    # welcome message
-    # prompt the user for an action
-    # keep going until the user types exit
+    welcome
+    action = menu_options(%w[random scores exit])
+    case  action
+    when "random" then ask_questions
+    end
   end
 
   def random_trivia
-    # load the questions from the api
-    # questions are loaded, then let's ask them
+    @questions = CliviaApi.questions[:results]
   end
 
   def ask_questions
+    random_trivia
+    @questions.map do |question|
+      options_data = []
+      puts "Category: #{@decoder.decode(question[:category])} | Difficulty: #{@decoder.decode(question[:difficulty])}"
+      puts "Question: #{@decoder.decode(question[:question])}"
+      options_data = question[:incorrect_answers]
+      options_data << question[:correct_answer]
+      if options_data.size == 2
+        options = options_data.sort_by {|s| s.size } 
+      else
+        options = options_data.sample(options_data.size)
+      end
+      results_hash = []
+      until options.size == 0
+        results_hash << new_hash = {id: @count, result: @decoder.decode(options.shift)}
+        puts "#{new_hash[:id]}. #{new_hash[:result]}"
+        @count += 1
+      end
+      print ">"
+      response = gets.chomp {}
+      results_user = results_hash.find {|hash| hash[:id] == response.to_i}
+      if results_user[:result] == question[:correct_answer]
+        puts "#{results_user[:result]}... Correct!"
+      else
+        puts "#{results_user[:result]}... Incorrect!"
+        puts "The correct answer was: #{question[:correct_answer]}"
+      end
+      @count = 1
+    end
     # ask each question
     # if response is correct, put a correct message and increase score
     # if response is incorrect, put an incorrect message, and which was the correct answer
