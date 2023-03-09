@@ -51,8 +51,11 @@ module QuestionsMethods
   end
 
   def make_question(category, question, difficulty, incorrect_answers, correct_answer)
+    # opptions_data = incorrect_answers + correct_answer
+    # 👆 This is the same as this other 👇
     options_data = incorrect_answers
     options_data << correct_answer
+    
     begin
       puts "Category: #{@decoding.decode(category)} | Difficulty: #{@decoding.decode(difficulty)}"
       puts "Question: #{@decoding.decode(question)}"
