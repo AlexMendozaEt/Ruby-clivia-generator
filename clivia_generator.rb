@@ -25,20 +25,19 @@ class CliviaGenerator
     @questions = CliviaApi.questions[:results]
   end
 
-  def ask_questions
-    random_trivia
-    @questions.map do |question|
+  def make_question(category,question,difficulty,incorrect_answers,correct_answer)
       options_data = []
-      puts "Category: #{@decoder.decode(question[:category])} | Difficulty: #{@decoder.decode(question[:difficulty])}"
-      puts "Question: #{@decoder.decode(question[:question])}"
-      options_data = question[:incorrect_answers]
-      options_data << question[:correct_answer]
+      options_data = incorrect_answers
+      options_data << correct_answer
+      begin
+      puts "Category: #{@decoder.decode(category)} | Difficulty: #{@decoder.decode(difficulty)}"
+      puts "Question: #{@decoder.decode(question)}"
       if options_data.size == 2
         options = options_data.sort_by {|s| s.size } 
       else
         options = options_data.sample(options_data.size)
       end
-      results_hash = []
+        results_hash = []
       until options.size == 0
         results_hash << new_hash = {id: @count, result: @decoder.decode(options.shift)}
         puts "#{new_hash[:id]}. #{new_hash[:result]}"
@@ -47,18 +46,41 @@ class CliviaGenerator
       print ">"
       response = gets.chomp {}
       results_user = results_hash.find {|hash| hash[:id] == response.to_i}
-      if results_user[:result] == question[:correct_answer]
-        puts "#{results_user[:result]}... Correct!"
+      if results_user[:result] == correct_answer
+        puts "#{results_user[:result]}... Correct!\n\n"
+        @score += 10
       else
         puts "#{results_user[:result]}... Incorrect!"
-        puts "The correct answer was: #{question[:correct_answer]}"
+        puts "The correct answer was: #{correct_answer}\n\n"
       end
+    rescue NoMethodError
+      puts "Invalid option\n\n"
+      @count = 1
+    retry
+    end
+  end
+
+  def ask_questions
+    random_trivia
+    @questions.map do |question|
+      make_question(question[:category],question[:question],question[:difficulty],question[:incorrect_answers],question[:correct_answer])
       @count = 1
     end
-    # ask each question
-    # if response is correct, put a correct message and increase score
-    # if response is incorrect, put an incorrect message, and which was the correct answer
-    # once the questions end, show user's score and promp to save it
+    puts "Well done! Your score is #{@score}"
+    puts "--------------------------------------------------"
+    loop do 
+      puts "Do you want to save your score? (y/n)"
+      print ">"
+      action = gets.chomp.strip.downcase
+      case action
+      when "y" 
+        puts "yes"
+      when "n" 
+        puts "no"
+      else 
+        puts "Invalid Option"
+      end
+    end
   end
 
   def save(data)
