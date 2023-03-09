@@ -1,7 +1,7 @@
 module SaveMethods
   def save
     data = text_coment("Type the name to assign to the score")
-    name = data.empty? ? "Anonymous" : data
+    name = data.empty? ? "anonymous" : data
     user_data = { name: name, score: @score, questions: @number_questions }
 
     data_scores = File.read(@filename)

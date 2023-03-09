@@ -9,15 +9,12 @@ module QuestionsMethods
     @number_questions
   end
 
-  # The name of the parameter is confusing, 
-  # what is coming here is the number of questions, not "questions" 👇
-  def ask_questions(questions)
-    # I think it is not necessary to instantiate `@questions`
-    random_trivia(questions).map do |question|
+  def ask_questions(number_of_questions)
+    random_trivia(number_of_questions).map do |question|
       make_question(
-        question[:category], 
-        question[:question], 
-        question[:difficulty], 
+        question[:category],
+        question[:question],
+        question[:difficulty],
         question[:incorrect_answers],
         question[:correct_answer]
       )
@@ -25,37 +22,35 @@ module QuestionsMethods
       @count = 1
     end
 
-    # It is also not necessary to go through instance 
-    # variable arguments (`@score`) because since it is 
-    # an instance, the whole app knows it.
-    score_points(questions)
+    score_points(number_of_questions)
+    safe_score?
+  end
 
+  def safe_score?
     loop do
       action = text_coment("Do you want to save your score? (y/n)")
       case action
-      when "y" then save
-                    @score = 0
-                    break
-      when "n" then @score = 0
-                    break
+      when "y"
+        save
+        @score = 0
+        break
+      when "n"
+        @score = 0
+        break
       else
         puts "Invalid Option\n".colorize(:red)
       end
     end
   end
 
-  # The name of the parameter is confusing, 
-  # what is coming here is the number of questions, not "questions" 👇
-  def random_trivia(questions)
-    CliviaApi.questions(questions)[:results]
+  def random_trivia(number_of_questions)
+    CliviaApi.questions(number_of_questions)[:results]
   end
 
   def make_question(category, question, difficulty, incorrect_answers, correct_answer)
-    # opptions_data = incorrect_answers + correct_answer
-    # 👆 This is the same as this other 👇
     options_data = incorrect_answers
     options_data << correct_answer
-    
+
     begin
       puts "Category: #{@decoding.decode(category)} | Difficulty: #{@decoding.decode(difficulty)}"
       puts "Question: #{@decoding.decode(question)}"
@@ -84,7 +79,7 @@ module QuestionsMethods
     print ">"
     response = gets.chomp
     results_user = results_hash.find { |hash| hash[:id] == response.to_i }
-    
+
     if results_user[:result] == @decoding.decode(correct_answer)
       puts "#{results_user[:result]}... Correct!\n".colorize(:green)
       @score += 10
