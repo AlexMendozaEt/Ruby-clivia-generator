@@ -12,9 +12,8 @@ module QuestionsMethods
   # The name of the parameter is confusing, 
   # what is coming here is the number of questions, not "questions" 👇
   def ask_questions(questions)
-    random_trivia(questions)
-
-    @questions.map do |question|
+    # I think it is not necessary to instantiate `@questions`
+    random_trivia(questions).map do |question|
       make_question(
         question[:category], 
         question[:question], 
@@ -22,7 +21,7 @@ module QuestionsMethods
         question[:incorrect_answers],
         question[:correct_answer]
       )
-      
+
       @count = 1
     end
 
@@ -45,7 +44,7 @@ module QuestionsMethods
   # The name of the parameter is confusing, 
   # what is coming here is the number of questions, not "questions" 👇
   def random_trivia(questions)
-    @questions = CliviaApi.questions(questions)[:results]
+    CliviaApi.questions(questions)[:results]
   end
 
   def make_question(category, question, difficulty, incorrect_answers, correct_answer)

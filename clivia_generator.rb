@@ -17,7 +17,7 @@ class CliviaGenerator
   def initialize(filename)
     @decoding = HTMLEntities.new
     @filename = filename
-    @questions = nil
+    # @questions = nil
     @score = 0
     @count = 1
     @number_questions = nil
