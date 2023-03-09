@@ -1,23 +1,55 @@
 require "htmlentities"
-require_relative "text_input"
+require "json"
+require "terminal-table"
+require "colorize"
+require_relative "helpers_methods"
 require_relative "clivia_api"
 
 class CliviaGenerator
-  include TextClivia
-
+  include HelpersMethods
   def initialize(filename)
-    @decoder = HTMLEntities.new
+    @decoding = HTMLEntities.new
     @filename = filename
-    @questions = []
+    @questions = nil
     @score = 0
     @count = 1
+    File.open(@filename, "w") unless File.exist?(@filename)
+    @data_scores = []
   end
 
   def start
-    welcome
-    action = menu_options(%w[random scores exit])
-    case  action
-    when "random" then ask_questions
+    loop do
+      welcome
+      action = menu_options(["random", "scores", "reset scores", "exit"])
+      case action
+      when "random" then ask_questions
+      when "scores" then parse_scores(@filename)
+      when "reset scores" then File.open(@filename, "w")
+      when "exit" then puts "Thanks for playing!".colorize(:green)
+                       break
+      end
+    end
+  end
+
+  def ask_questions
+    random_trivia
+    @questions.map do |question|
+      make_question(question[:category], question[:question], question[:difficulty], question[:incorrect_answers],
+                    question[:correct_answer])
+      @count = 1
+    end
+    score_points(@score)
+    loop do
+      action = text_coment("Do you want to save your score? (y/n)")
+      case action
+      when "y" then save
+                    @score = 0
+                    break
+      when "n" then @score = 0
+                    break
+      else
+        puts "Invalid Option\n".colorize(:red)
+      end
     end
   end
 
@@ -25,60 +57,56 @@ class CliviaGenerator
     @questions = CliviaApi.questions[:results]
   end
 
-  def ask_questions
-    random_trivia
-    @questions.map do |question|
-      options_data = []
-      puts "Category: #{@decoder.decode(question[:category])} | Difficulty: #{@decoder.decode(question[:difficulty])}"
-      puts "Question: #{@decoder.decode(question[:question])}"
-      options_data = question[:incorrect_answers]
-      options_data << question[:correct_answer]
-      if options_data.size == 2
-        options = options_data.sort_by {|s| s.size } 
-      else
-        options = options_data.sample(options_data.size)
-      end
-      results_hash = []
-      until options.size == 0
-        results_hash << new_hash = {id: @count, result: @decoder.decode(options.shift)}
-        puts "#{new_hash[:id]}. #{new_hash[:result]}"
-        @count += 1
-      end
-      print ">"
-      response = gets.chomp {}
-      results_user = results_hash.find {|hash| hash[:id] == response.to_i}
-      if results_user[:result] == question[:correct_answer]
-        puts "#{results_user[:result]}... Correct!"
-      else
-        puts "#{results_user[:result]}... Incorrect!"
-        puts "The correct answer was: #{question[:correct_answer]}"
-      end
+  def make_question(category, question, difficulty, incorrect_answers, correct_answer)
+    options_data = incorrect_answers
+    options_data << correct_answer
+    begin
+      puts "Category: #{@decoding.decode(category)} | Difficulty: #{@decoding.decode(difficulty)}"
+      puts "Question: #{@decoding.decode(question)}"
+      options = if options_data.size == 2
+                  options_data.sort_by(&:size)
+                else
+                  options_data.sample(options_data.size)
+                end
+      valid_anwers(options, correct_answer)
+    rescue NoMethodError
+      puts "Invalid option\n".colorize(:red)
       @count = 1
+      retry
     end
-    # ask each question
-    # if response is correct, put a correct message and increase score
-    # if response is incorrect, put an incorrect message, and which was the correct answer
-    # once the questions end, show user's score and promp to save it
   end
 
-  def save(data)
-    # write to file the scores data
+  def valid_anwers(options, correct_answer)
+    results_hash = []
+    until options.empty?
+      results_hash << new_hash = { id: @count, result: @decoding.decode(options.shift) }
+      puts "#{new_hash[:id]}. #{new_hash[:result]}"
+      @count += 1
+    end
+    print ">"
+    response = gets.chomp
+    results_user = results_hash.find { |hash| hash[:id] == response.to_i }
+    if results_user[:result] == @decoding.decode(correct_answer)
+      puts "#{results_user[:result]}... Correct!\n".colorize(:green)
+      @score += 10
+    else
+      puts "#{results_user[:result]}... Incorrect!".colorize(:red)
+      puts "The correct answer was: #{@decoding.decode(correct_answer)}\n".colorize(:green)
+    end
   end
 
-  def parse_scores
-    # get the scores data from file
-  end
-
-  def load_questions
-    # ask the api for a random set of questions
-    # then parse the questions
-  end
-
-  def parse_questions
-    # questions came with an unexpected structure, clean them to make it usable for our purposes
-  end
-
-  def print_scores
-    # print the scores sorted from top to bottom
+  def save
+    data = text_coment("Type the name to assign to the score")
+    name = data.empty? ? "Anonymous" : data
+    user_data = { name: name, score: @score }
+    data_scores = File.read(@filename)
+    score_data = data_scores.empty? ? nil : JSON.parse(data_scores)
+    if data_scores.empty?
+      @data_scores << user_data
+      File.write(@filename, @data_scores.to_json)
+    else
+      score_data << user_data
+      File.write(@filename, score_data.to_json)
+    end
   end
 end
