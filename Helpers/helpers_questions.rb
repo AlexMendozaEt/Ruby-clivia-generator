@@ -5,7 +5,7 @@ module QuestionsMethods
 
     @number_questions = user_questions.empty? ? 10 : user_questions
     puts "You have chosen #{@number_questions} questions.".colorize(:green)
-    
+
     @number_questions
   end
 
@@ -17,6 +17,7 @@ module QuestionsMethods
       @count = 1
     end
     score_points(@score, questions)
+    
     loop do
       action = text_coment("Do you want to save your score? (y/n)")
       case action

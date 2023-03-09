@@ -35,8 +35,18 @@ class CliviaGenerator
       # you would rather occupy the line break
 
       # DOCS: https://www.rubyguides.com/2015/10/ruby-case/
-      when "random" then numb_quest = number_of_questions
-                         ask_questions(numb_quest)
+      when "random" 
+        # Here we are assigning a return value (numb_quest) that is already 
+        # stored in an instance variable (@number_questions)
+
+        # You probably don't need to capture the return value and then pass it 
+        # as an argument to the `ask_questions` method, in the current scenario 
+        # you would use that instance variable.
+        numb_quest = number_of_questions
+        ask_questions(numb_quest)
+
+        # Or, ultimately, you would not use the `@number_questions` instance 
+        # variable and only work methods with return values
       when "scores" then parse_scores(@filename)
                          menu_score
       when "reset scores" then File.open(@filename, "w")
