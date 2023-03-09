@@ -3,8 +3,10 @@ module SaveMethods
     data = text_coment("Type the name to assign to the score")
     name = data.empty? ? "Anonymous" : data
     user_data = { name: name, score: @score, questions: @number_questions }
+
     data_scores = File.read(@filename)
     score_data = data_scores.empty? ? nil : JSON.parse(data_scores)
+
     if data_scores.empty?
       @data_scores << user_data
       File.write(@filename, @data_scores.to_json)

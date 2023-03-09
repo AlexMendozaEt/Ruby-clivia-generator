@@ -47,8 +47,9 @@ class CliviaGenerator
 
         # Or, ultimately, you would not use the `@number_questions` instance 
         # variable and only work methods with return values
-      when "scores" then parse_scores(@filename)
-                         menu_score
+      when "scores" 
+        parse_scores(@filename)
+        menu_score
       when "reset scores" then File.open(@filename, "w")
       when "exit" then puts "Thanks for playing!".colorize(:green)
                        break

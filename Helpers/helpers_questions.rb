@@ -74,14 +74,17 @@ module QuestionsMethods
 
   def valid_anwers(options, correct_answer)
     results_hash = []
+
     until options.empty?
       results_hash << new_hash = { id: @count, result: @decoding.decode(options.shift) }
       puts "#{new_hash[:id]}. #{new_hash[:result]}"
       @count += 1
     end
+
     print ">"
     response = gets.chomp
     results_user = results_hash.find { |hash| hash[:id] == response.to_i }
+    
     if results_user[:result] == @decoding.decode(correct_answer)
       puts "#{results_user[:result]}... Correct!\n".colorize(:green)
       @score += 10
