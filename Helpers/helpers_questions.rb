@@ -2,8 +2,10 @@ module QuestionsMethods
   def number_of_questions
     user_questions = text_coment("If you want a certain number of questions, enter the amount.")
     user_questions = text_coment("Cannot be less than 10") until user_questions.to_i >= 10 || user_questions.empty?
+
     @number_questions = user_questions.empty? ? 10 : user_questions
     puts "You have chosen #{@number_questions} questions.".colorize(:green)
+    
     @number_questions
   end
 
