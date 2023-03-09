@@ -12,8 +12,8 @@ module ScoreMethods
     end
   end
 
-  def score_points(score, questions)
-    puts "Well done! Your score is #{score} out of a total of #{questions} questions".colorize(:blue)
+  def score_points(questions)
+    puts "Well done! Your score is #{@score} out of a total of #{questions} questions".colorize(:blue)
     puts "--------------------------------------------------"
   end
 

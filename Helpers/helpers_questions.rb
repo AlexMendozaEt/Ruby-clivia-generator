@@ -25,7 +25,10 @@ module QuestionsMethods
       @count = 1
     end
 
-    score_points(@score, questions)
+    # It is also not necessary to go through instance 
+    # variable arguments (`@score`) because since it is 
+    # an instance, the whole app knows it.
+    score_points(questions)
 
     loop do
       action = text_coment("Do you want to save your score? (y/n)")
