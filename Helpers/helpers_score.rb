@@ -7,7 +7,8 @@ module ScoreMethods
       when "cambiar nombre"
         change_name
         break
-      when "back" then break
+      when "back"
+        break
       else
         puts "Invalid Option\n".colorize(:red)
       end

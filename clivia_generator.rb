@@ -31,15 +31,15 @@ class CliviaGenerator
       case action
 
       when "random"
-
         ask_questions(number_of_questions)
-
       when "scores"
         parse_scores(@filename)
         menu_score
-      when "reset scores" then File.open(@filename, "w")
-      when "exit" then puts "Thanks for playing!".colorize(:green)
-                       break
+      when "reset scores"
+        File.open(@filename, "w")
+      when "exit"
+        puts "Thanks for playing!".colorize(:green)
+        break
       end
     end
   end
