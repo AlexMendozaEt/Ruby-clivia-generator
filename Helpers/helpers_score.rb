@@ -4,10 +4,11 @@ module ScoreMethods
 
     loop do
       case action
-      when "cambiar nombre" 
+      when "cambiar nombre"
         change_name
         break
-      when "back" then break
+      when "back"
+        break
       else
         puts "Invalid Option\n".colorize(:red)
       end
@@ -53,15 +54,14 @@ module ScoreMethods
       hash[:name] == dato ? hash[:name] = new_name : hash[:name]
     end
 
-    # What is mean `dataw`?
-    dataw = table_scores.to_json
+    data_write = table_scores.to_json
     text_invalid = "The user #{dato.capitalize} doesn't exist.".colorize(:red)
     sym = { symbolize_names: true }
 
-    response = table_scores == JSON.parse(file_scores, sym) ? text_invalid : File.write(@filename, dataw)
+    response = table_scores == JSON.parse(file_scores, sym) ? text_invalid : File.write(@filename, data_write)
 
     puts response == text_invalid ? response : ""
-    
+
     parse_scores(@filename)
     menu_score
   end
